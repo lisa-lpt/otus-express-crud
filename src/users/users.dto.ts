@@ -1,3 +1,5 @@
+import { Request } from 'express';
+
 export interface User {
   id: number;
   name: string;
@@ -12,6 +14,23 @@ export interface CreateUserDto {
 export interface UpdateUserDto {
   name?: string;
   email?: string;
+}
+
+export interface GetUsersFilters {
+  page: number;
+  limit: number;
+  userId?: number;
+  search?: string;
+}
+
+export interface GetUsersResult {
+  data: User[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 export const usersValidator = {
@@ -42,6 +61,27 @@ export const usersValidator = {
     }
 
     if ('email' in data && typeof data.email !== 'string') {
+      return false;
+    }
+
+    return true;
+  },
+
+  validateFilters: (req: Request) => {
+    const { page, limit } = req.query;
+
+    const parsedPage = page ? Number(page) : 1;
+    const parsedLimit = limit ? Number(limit) : 10;
+
+    if (!Number.isInteger(parsedPage) || parsedPage < 1) {
+      return false;
+    }
+
+    if (!Number.isInteger(parsedLimit) || parsedLimit < 1) {
+      return false;
+    }
+
+    if (parsedLimit > 100) {
       return false;
     }
 

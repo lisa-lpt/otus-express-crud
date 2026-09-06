@@ -1,15 +1,20 @@
 import { Request, Response } from 'express';
-import { usersService } from './users.service.js';
-import { usersValidator } from './users.dto.js';
+import { tasksService } from './tasks.service.js';
+import { tasksValidator } from './tasks.dto.js';
 
-export const usersController = {
+export const tasksController = {
   getAll: (req: Request, res: Response) => {
-    if (!usersValidator.validateFilters(req)) {
+    if (!tasksValidator.validateFilters(req)) {
       res.status(400).json({
         message: 'Invalid request',
       });
       return;
     }
+
+    const userId =
+      typeof req.query.userId === 'string'
+        ? Number(req.query.userId)
+        : undefined;
 
     const page =
       typeof req.query.page === 'string' ? Number(req.query.page) : 1;
@@ -21,67 +26,67 @@ export const usersController = {
         ? req.query.search.trim()
         : undefined;
 
-    res.json(usersService.getAll({ page, limit, search }));
+    res.json(tasksService.getAll({ page, limit, userId, search }));
   },
 
   get: (req: Request, res: Response) => {
     const id = Number(req.params.id);
 
-    const user = usersService.get(id);
+    const task = tasksService.get(id);
 
-    if (!user) {
+    if (!task) {
       res.status(404).json({
-        message: 'User not found',
+        message: 'Task not found',
       });
       return;
     }
 
-    res.json(user);
+    res.json(task);
   },
 
   create: (req: Request, res: Response) => {
-    if (!usersValidator.validateCreate(req.body)) {
+    if (!tasksValidator.validateCreate(req.body)) {
       res.status(400).json({
-        message: 'Invalid user data',
+        message: 'Invalid task data',
       });
       return;
     }
 
-    const user = usersService.create(req.body);
+    const task = tasksService.create(req.body);
 
-    res.status(201).json(user);
+    res.status(201).json(task);
   },
 
   update: (req: Request, res: Response) => {
     const id = Number(req.params.id);
 
-    if (!usersValidator.validateUpdate(req.body)) {
+    if (!tasksValidator.validateUpdate(req.body)) {
       res.status(400).json({
-        message: 'Invalid user data',
+        message: 'Invalid task data',
       });
       return;
     }
 
-    const user = usersService.update(id, req.body);
+    const task = tasksService.update(id, req.body);
 
-    if (!user) {
+    if (!task) {
       res.status(404).json({
-        message: 'User not found',
+        message: 'Task not found',
       });
       return;
     }
 
-    res.json(user);
+    res.json(task);
   },
 
   delete: (req: Request, res: Response) => {
     const id = Number(req.params.id);
 
-    const deleted = usersService.delete(id);
+    const deleted = tasksService.delete(id);
 
     if (!deleted) {
       res.status(404).json({
-        message: 'User not found',
+        message: 'Task not found',
       });
       return;
     }
