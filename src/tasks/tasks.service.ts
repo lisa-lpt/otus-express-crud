@@ -1,26 +1,41 @@
 import { tasksData } from './tasks.data.js';
 import {
   CreateTaskDto,
-  FilterTaskArgs,
+  GetTasksFilters,
   GetTasksResult,
   Task,
   UpdateTaskDto,
 } from './tasks.dto.js';
 
 export const tasksService = {
-  getAll: ({ page, limit, userId }: FilterTaskArgs): GetTasksResult => {
-    const filteredTasks = userId
-      ? tasksData.tasks.filter((task) => task.userId === userId)
-      : tasksData.tasks;
+  getAll: ({
+    page,
+    limit,
+    userId,
+    search,
+  }: GetTasksFilters): GetTasksResult => {
+    let filteredTasks = tasksData.tasks;
+
+    if (userId) {
+      filteredTasks = filteredTasks.filter((task) => task.userId === userId);
+    }
+
+    if (search) {
+      filteredTasks = filteredTasks.filter(
+        (task) =>
+          task.title.includes(search) || task.description.includes(search)
+      );
+    }
 
     const total = filteredTasks.length;
     const start = (page - 1) * limit;
     const end = start + limit;
-    const paginatedTasks = filteredTasks.slice(start, end);
     const totalPages = Math.ceil(total / limit);
 
+    filteredTasks = filteredTasks.slice(start, end);
+
     return {
-      data: paginatedTasks,
+      data: filteredTasks,
       pagination: {
         page,
         limit,

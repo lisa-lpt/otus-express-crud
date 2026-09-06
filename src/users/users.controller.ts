@@ -4,7 +4,24 @@ import { usersValidator } from './users.dto.js';
 
 export const usersController = {
   getAll: (req: Request, res: Response) => {
-    res.json(usersService.getAll());
+    if (!usersValidator.validateFilters(req)) {
+      res.status(400).json({
+        message: 'Invalid request',
+      });
+      return;
+    }
+
+    const page =
+      typeof req.query.page === 'string' ? Number(req.query.page) : 1;
+    const limit =
+      typeof req.query.limit === 'string' ? Number(req.query.limit) : 10;
+
+    const search =
+      typeof req.query.search === 'string'
+        ? req.query.search.trim()
+        : undefined;
+
+    res.json(usersService.getAll({ page, limit, search }));
   },
 
   get: (req: Request, res: Response) => {

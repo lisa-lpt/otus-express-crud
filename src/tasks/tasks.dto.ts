@@ -19,10 +19,11 @@ export interface UpdateTaskDto {
   description?: string;
 }
 
-export interface FilterTaskArgs {
+export interface GetTasksFilters {
   page: number;
   limit: number;
   userId?: number;
+  search?: string;
 }
 
 export interface GetTasksResult {
@@ -74,7 +75,7 @@ export const tasksValidator = {
     return true;
   },
 
-  validateTasksQuery: (req: Request) => {
+  validateFilters: (req: Request) => {
     const { page, limit, userId } = req.query;
 
     const parsedPage = page ? Number(page) : 1;

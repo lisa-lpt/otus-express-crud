@@ -4,7 +4,7 @@ import { tasksValidator } from './tasks.dto.js';
 
 export const tasksController = {
   getAll: (req: Request, res: Response) => {
-    if (!tasksValidator.validateTasksQuery(req)) {
+    if (!tasksValidator.validateFilters(req)) {
       res.status(400).json({
         message: 'Invalid request',
       });
@@ -21,7 +21,12 @@ export const tasksController = {
     const limit =
       typeof req.query.limit === 'string' ? Number(req.query.limit) : 10;
 
-    res.json(tasksService.getAll({ page, limit, userId }));
+    const search =
+      typeof req.query.search === 'string'
+        ? req.query.search.trim()
+        : undefined;
+
+    res.json(tasksService.getAll({ page, limit, userId, search }));
   },
 
   get: (req: Request, res: Response) => {

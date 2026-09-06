@@ -1,8 +1,39 @@
-import { User, CreateUserDto, UpdateUserDto } from './users.dto.js';
+import {
+  User,
+  CreateUserDto,
+  UpdateUserDto,
+  GetUsersFilters,
+  GetUsersResult,
+} from './users.dto.js';
 import { usersData } from './users.data.js';
 
 export const usersService = {
-  getAll: (): User[] => usersData.users,
+  getAll: ({ page, limit, search }: GetUsersFilters): GetUsersResult => {
+    let filteredUsers = usersData.users;
+
+    if (search) {
+      filteredUsers = filteredUsers.filter(
+        (user) => user.name.includes(search) || user.email.includes(search)
+      );
+    }
+
+    const total = filteredUsers.length;
+    const start = (page - 1) * limit;
+    const end = start + limit;
+    const totalPages = Math.ceil(total / limit);
+
+    filteredUsers = filteredUsers.slice(start, end);
+
+    return {
+      data: filteredUsers,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+      },
+    };
+  },
 
   get: (id: number): User | undefined => {
     return usersData.users.find((user) => user.id === id);
